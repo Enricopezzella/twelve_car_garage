@@ -5,9 +5,9 @@ import pyowm
 greetings = ["Привет", "Дратути", "Здравствуй",]
 how_are_you = ["Отлично", "Ужасно", "Хорошо","Супер Гуд ! Я выйграл в лотерее"]
 
-token =871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY
+token = "871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY"
 
-bot = telebot.TeleBot(token)
+bot = telebot.6cars(871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY)
 
   @bot.message_handler(commands=["weather"])
 def weather(message):
@@ -16,7 +16,7 @@ def weather(message):
     
     
 def weath(message):
-    owm = pyowm.OWM("api-ключ с сайта OpenWeatherMap")
+    owm = pyowm.OWM("6c5244258b5d143c3191d2a123b573a8")
     city = message.text
     weather = owm.weather_at_place(city)
     w = weather.get_weather()
@@ -54,7 +54,7 @@ def weather(message):
     
     
 def weath(message):
-    owm = pyowm.OWM("api-ключ с сайта OpenWeatherMap", language="ru")
+    owm = pyowm.OWM("6c5244258b5d143c3191d2a123b573a8", language="ru")
     city = message.text
     weather = owm.weather_at_place(city)
     w = weather.get_weather()
