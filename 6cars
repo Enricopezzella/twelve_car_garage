@@ -26,13 +26,7 @@ def weath(message):
     desc = w.get_detailed_status()
     bot.send_message(message.chat.id, "Сейчас в городе " + str(city) + " " + str(desc) + ", температура - " + str(temperature) + "°C, влажность - " + str(hum) + "%, скорость ветра - " +str(wind) + "м/с.")
      
-    
-    
-    
-    
-    
-    
-    
+     
 @bot.message_handler(commands=["start"])
 def start(message):
     bot.send_message(message.chat.id, "Привет, " + message.chat.first_name)
@@ -45,12 +39,10 @@ def main(message):
         bot.send_message(message.chat.id, random.choice(how_are_you))
 
 
-        
 @bot.message_handler(commands=["weather"])
 def weather(message):
     city = bot.send_message(message.chat.id, "В каком городе Вам показать погодку?")
     bot.register_next_step_handler(city, weath)
-    
     
     
 def weath(message):
