@@ -6,10 +6,10 @@ import telebot
 from pyowm.exceptions.api_response_error import NotFoundError
 from forex_python.converter import CurrencyRates, get_rates, RatesNotAvailableError
 
-token = '871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY'
+token = '811144163:AAF74Jn7ztetg6g9SY2SlQ-hG8PXxgIK5uE'
 
 
-bot = telebot.TeleBot("871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY")
+bot = telebot.TeleBot("811144163:AAF74Jn7ztetg6g9SY2SlQ-hG8PXxgIK5uE")
 
 list = []
 
@@ -20,6 +20,8 @@ def proverka(message):
         weather1(message)
     elif message.text == "rat":
         qaz(message)
+    elif message.text == "kypc":
+        wtfisup(message)
     else:
         bot.send_message(message.chat.id, "напиши привет")
 
@@ -88,6 +90,12 @@ def qwert(message):
 def refresh(message):
     list[:] = []
 
+def wtfisup(message):
+    c = CurrencyRates()
+    list1 = ['USD', "EUR", "GBP"]
+    for i in list1:
+        q = c.convert(str(i), "RUB", 1)
+        bot.send_message(message.chat.id,str(1)+ ' ' + str(i) + " " + '=' + " " + str(q) + " " + "RUB")
 
 while True:
 
