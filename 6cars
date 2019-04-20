@@ -1,10 +1,11 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import time
-
 import pyowm
 import telebot
-from pyowm.exceptions import api_response_error
+from pyowm.exceptions.api_response_error import NotFoundError
+from forex_python.converter import CurrencyRates, get_rates, RatesNotAvailableError
+
 token = '871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY'
 
 
@@ -16,13 +17,13 @@ list = []
 @bot.message_handler(content_types=['text'])
 def proverka(message):
     if message.text == "Hello":
-        weather(message)
+        weather1(message)
     elif message.text == "rat":
         qaz(message)
     else:
         bot.send_message(message.chat.id, "напиши привет")
 
-def weather(message):
+def weather1(message):
     city = bot.send_message(message.chat.id, "Where to show")
     bot.register_next_step_handler(city, wtf)
 
@@ -33,55 +34,75 @@ def wtf(message):
     cisy = message.text
     try:
         owm.weather_at_place(cisy)
-    except:
-        api_response_error.NotFoundError('Unable to find the resource')
+    except NotFoundError:
         bot.send_message(message.chat.id, "Wrong information, try again to find out mistakes please")
-
-
-
-    weather = owm.weather_at_place(cisy)
-
-    w = weather.get_weather()
-    temperature = w.get_temperature("celsius")["temp"]
-
-    bot.send_message(message.chat.id, "weather" +  "in" + str(cisy) + str(temperature))
-
+        weather1(message)
+    else:
+        weather = owm.weather_at_place(cisy)
+        w = weather.get_weather()
+        temperature = w.get_temperature("celsius")["temp"]
+        bot.send_message(message.chat.id, "weather" + "in" + str(cisy) + str(temperature))
 
 
 
 
 
-
-from forex_python.converter import CurrencyRates
 def qaz(message):
     vopros = bot.send_message(message.chat.id, "Сколько")
     bot.register_next_step_handler(vopros, qwe)
 def qwe(message):
-    quantity = list.append(message.text)
     try:
-        float(list[0])
-    except:
-        ValueError
+        float(message.text)
+    except ValueError:
         bot.send_message(message.chat.id, "введите число")
         qaz(message)
-    if ValueError == False:
+    else:
+        quantity = list.append(message.text)
         vopros1 = bot.send_message(message.chat.id, "из чего")
-        bot.register_next_step_handler(vopros1, qwer)
+        bot.register_next_step_handler(vopros1, qwer )
 
 def qwer(message):
-    izchego = list.append(message.text)
-    vopros2 = bot.send_message(message.chat.id, "Во что")
-    bot.register_next_step_handler(vopros2, qwert)
+    try:
+        get_rates(str(message.text.upper()))
+    except RatesNotAvailableError:
+        bot.send_message(message.chat.id, "вы неправильно ввели название валюты")
+        vopros1 = bot.send_message(message.chat.id, "из чего")
+        bot.register_next_step_handler(vopros1, qwer)
+    else:
+        izchego = list.append(message.text.upper())
+        vopros2 = bot.send_message(message.chat.id, "Во что")
+        bot.register_next_step_handler(vopros2, qwert)
 def qwert(message):
-    vochto = list.append(message.text)
-
-    c = CurrencyRates()
-
-    q = c.convert(str(list[1]), str(list[2]), float(list[0]))
-    bot.send_message(message.chat.id, q)
-    refresh(message)
+    try:
+        get_rates(str(message.text.upper()))
+    except RatesNotAvailableError:
+        bot.send_message(message.chat.id, "вы неправильно ввели название валюты")
+        vopros2 = bot.send_message(message.chat.id, "Во что")
+        bot.register_next_step_handler(vopros2, qwert)
+    else:
+        vochto = list.append(message.text.upper())
+        c = CurrencyRates()
+        q = c.convert(str(list[1]), str(list[2]), float(list[0]))
+        bot.send_message(message.chat.id, q)
+        refresh(message)
 def refresh(message):
     list[:] = []
 
 
-bot.polling()
+while True:
+
+    try:
+
+        bot.polling(none_stop=True)
+
+    # ConnectionError and ReadTimeout because of possible timout of the requests library
+
+    # TypeError for moviepy errors
+
+    # maybe there are others, therefore Exception
+
+    except Exception as e:
+
+        telebot.logger.error(e)
+
+        time.sleep(5)
