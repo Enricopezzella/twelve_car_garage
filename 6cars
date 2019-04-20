@@ -6,12 +6,13 @@ import telebot
 from pyowm.exceptions.api_response_error import NotFoundError
 from forex_python.converter import CurrencyRates, get_rates, RatesNotAvailableError
 
-token = '811144163:AAF74Jn7ztetg6g9SY2SlQ-hG8PXxgIK5uE'
+token = '871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY'
 
 
-bot = telebot.TeleBot("811144163:AAF74Jn7ztetg6g9SY2SlQ-hG8PXxgIK5uE")
+bot = telebot.TeleBot("871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY")
 
 list = []
+
 
 
 @bot.message_handler(content_types=['text'])
@@ -22,8 +23,11 @@ def proverka(message):
         qaz(message)
     elif message.text == "kypc":
         wtfisup(message)
+
     else:
         bot.send_message(message.chat.id, "напиши привет")
+
+
 
 def weather1(message):
     city = bot.send_message(message.chat.id, "Where to show")
@@ -90,12 +94,15 @@ def qwert(message):
 def refresh(message):
     list[:] = []
 
+
 def wtfisup(message):
     c = CurrencyRates()
-    list1 = ['USD', "EUR", "GBP"]
+    list1 = ['USD', "EUR", "GBP", "JPY", "CNY"]
     for i in list1:
         q = c.convert(str(i), "RUB", 1)
-        bot.send_message(message.chat.id,str(1)+ ' ' + str(i) + " " + '=' + " " + str(q) + " " + "RUB")
+        bot.send_message(message.chat.id,str(1) + " " + str(i) + " " + '=' + " " + str(round(float(q), 4)) + " " + \
+                         "RUB")
+
 
 while True:
 
