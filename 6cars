@@ -4,7 +4,6 @@ import time
 
 import pyowm
 import telebot
-
 from pyowm.exceptions import api_response_error
 token = '871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY'
 
@@ -17,12 +16,20 @@ list = []
 @bot.message_handler(content_types=['text'])
 def proverka(message):
     if message.text == "Hello":
-@@ -25,11 +30,26 @@ def weather(message):
+        weather(message)
+    elif message.text == "rat":
+        qaz(message)
+    else:
+        bot.send_message(message.chat.id, "напиши привет")
+
+def weather(message):
+    city = bot.send_message(message.chat.id, "Where to show")
+    bot.register_next_step_handler(city, wtf)
+
+
 
 def wtf(message):
     owm = pyowm.OWM('9a5624fb9a6d6535203e750abacf0e32')
-    city = message.text
-    weather = owm.weather_at_place(city)
     cisy = message.text
     try:
         owm.weather_at_place(cisy)
@@ -36,7 +43,6 @@ def wtf(message):
 
     w = weather.get_weather()
     temperature = w.get_temperature("celsius")["temp"]
-    bot.send_message(message.chat.id, "weather" +  " in " + str(city) + " " + str(temperature))
 
     bot.send_message(message.chat.id, "weather" +  "in" + str(cisy) + str(temperature))
 
@@ -47,12 +53,11 @@ def wtf(message):
 
 
 from forex_python.converter import CurrencyRates
-@@ -38,24 +58,30 @@ def qaz(message):
+def qaz(message):
+    vopros = bot.send_message(message.chat.id, "Сколько")
     bot.register_next_step_handler(vopros, qwe)
 def qwe(message):
     quantity = list.append(message.text)
-    vopros1 = bot.send_message(message.chat.id, "из чего")
-    bot.register_next_step_handler(vopros1, qwer)
     try:
         float(list[0])
     except:
@@ -71,16 +76,12 @@ def qwert(message):
     vochto = list.append(message.text)
 
     c = CurrencyRates()
-    q = c.convert(str(list[1]), str(list[2]), int(list[0]))
 
     q = c.convert(str(list[1]), str(list[2]), float(list[0]))
     bot.send_message(message.chat.id, q)
     refresh(message)
 def refresh(message):
     list[:] = []
-
-
-
 
 
 bot.polling()
