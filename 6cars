@@ -25,11 +25,11 @@ def weather(message):
 
 def wtf(message):
     owm = pyowm.OWM('9a5624fb9a6d6535203e750abacf0e32')
-    cisy = message.text
-    weather = owm.weather_at_place(cisy)
+    city = message.text
+    weather = owm.weather_at_place(city)
     w = weather.get_weather()
     temperature = w.get_temperature("celsius")["temp"]
-    bot.send_message(message.chat.id, "weather" +  "in" + str(cisy) + str(temperature))
+    bot.send_message(message.chat.id, "weather" +  " in " + str(city) + " " + str(temperature))
 
 
 from forex_python.converter import CurrencyRates
