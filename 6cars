@@ -1,123 +1,212 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
+# coding=utf-8
 import time
 import pyowm
 import telebot
 from pyowm.exceptions.api_response_error import NotFoundError
 from forex_python.converter import CurrencyRates, get_rates, RatesNotAvailableError
+from telebot import types
+
 
 token = '871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY'
-
-
 bot = telebot.TeleBot("871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY")
+
 
 list = []
 
 
-
 @bot.message_handler(content_types=['text'])
-def proverka(message):
-    if message.text == "Hello":
-        weather1(message)
-    elif message.text == "rat":
-        qaz(message)
-    elif message.text == "kypc":
-        wtfisup(message)
 
+
+def beginning(message):
+    if message.text.lower() == "hello":
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        itembtn1 = types.InlineKeyboardButton("Показать погоду", callback_data= "one")
+        itembtn2 = types.InlineKeyboardButton("Показать курс валют", callback_data= "two")
+        itembtn3 = types.InlineKeyboardButton("Включить конвертер валют", callback_data= "three")
+        markup.add(itembtn1, itembtn2, itembtn3)
+        bot.send_message(message.chat.id,"Выбери", reply_markup=markup)
+    elif message.text.lower() == "suh dude":
+        bot.send_message(message.chat.id, "dude suh")
+        bot.send_document(chat_id = message.chat.id, data = "CAADAgADJwcAAvoLtgj4MEIYo8cIRgI")
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        itembtn1 = types.InlineKeyboardButton("Показать погоду", callback_data="one")
+        itembtn2 = types.InlineKeyboardButton("Показать курс валют", callback_data="two")
+        itembtn3 = types.InlineKeyboardButton("Включить конвертер валют", callback_data="three")
+        markup.add(itembtn1, itembtn2, itembtn3)
+        bot.send_message(message.chat.id, "Выбери", reply_markup=markup)
+    elif message.text.lower() == "dude suh":
+        bot.send_message(message.chat.id, "suh dude")
+        bot.send_document(chat_id = message.chat.id, data = 'CAADAgADJwcAAvoLtgj4MEIYo8cIRgI')
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        itembtn1 = types.InlineKeyboardButton("Показать погоду", callback_data="one")
+        itembtn2 = types.InlineKeyboardButton("Показать курс валют", callback_data="two")
+        itembtn3 = types.InlineKeyboardButton("Включить конвертер валют", callback_data="three")
+        markup.add(itembtn1, itembtn2, itembtn3)
+        bot.send_message(message.chat.id, "Выбери", reply_markup=markup)
     else:
-        bot.send_message(message.chat.id, "напиши привет")
+        bot.send_message(message.chat.id, "Say hello")
+
+@bot.callback_query_handler(func=lambda call: True)
+def handle(message):
+    if message.data == "one":
+        voproskyda(message)
+    elif message.data == "odin":
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        itembtn1 = types.InlineKeyboardButton("Показать погоду", callback_data="one")
+        itembtn2 = types.InlineKeyboardButton("Показать курс валют", callback_data="two")
+        itembtn3 = types.InlineKeyboardButton("Включить конвертер валют", callback_data="three")
+        markup.add(itembtn1, itembtn2, itembtn3)
+        bot.send_message(chat_id= message.message.chat.id, text = "Выбери одно", reply_markup=markup)
+    elif message.data == "dva":
+        bot.send_document(chat_id = message.message.chat.id, data = "CAADAgADXwUAAvoLtgiM3nB1w_T5xwI")
+    elif message.data == "two":
+        kypc(message)
+    elif message.data == "three":
+        voprosskolko(message)
 
 
+def voproskyda(message):
+    bot.send_message(chat_id=message.message.chat.id, text="Пожалуйста, используйте латиницу и полные названия городов")
+    city = bot.send_message(chat_id =message.message.chat.id, text = "Введите город")
+    bot.register_next_step_handler(city, pogoda)
+def voproskyda1(message):
+    city = bot.send_message(chat_id=message.chat.id, text="Введите город")
+    bot.register_next_step_handler(city, pogoda)
 
-def weather1(message):
-    city = bot.send_message(message.chat.id, "Where to show")
-    bot.register_next_step_handler(city, wtf)
 
-
-
-def wtf(message):
+def pogoda(message):
     owm = pyowm.OWM('9a5624fb9a6d6535203e750abacf0e32')
-    cisy = message.text
-    try:
-        owm.weather_at_place(cisy)
-    except NotFoundError:
-        bot.send_message(message.chat.id, "Wrong information, try again to find out mistakes please")
-        weather1(message)
+    city = message.text
+    try: owm.weather_at_place(city)
+    except NotFoundError or UnicodeEncodeError:
+        bot.send_message(message.chat.id, "Вы неправильно ввели название города")
+        voproskyda1(message)
     else:
-        weather = owm.weather_at_place(cisy)
+        weather = owm.weather_at_place(city)
         w = weather.get_weather()
         temperature = w.get_temperature("celsius")["temp"]
-        bot.send_message(message.chat.id, "weather" + "in" + str(cisy) + str(temperature))
+        wind = w.get_wind()["speed"]
+        hum = w.get_humidity()
+        try: str(city)
+        except UnicodeEncodeError:
+            bot.send_message(message.chat.id, "Вы неправильно ввели название города")
+            voproskyda1(message)
+        else:
+            bot.send_document(chat_id=message.chat.id, data="CAADAgADMAYAAvoLtggy_Y_k7S6puAI")
+            time.sleep(3)
+            bot.send_message(message.chat.id,"Сейчас в городе " + str(city) + " " + "температура - " + \
+                         str(temperature) + "°C, влажность - " + str(hum) + "%, скорость ветра - " +str(wind) + "м/с.")
+            markup = types.InlineKeyboardMarkup(row_width=1)
+            knopka1 = types.InlineKeyboardButton("Да", callback_data="odin")
+            knopka2 = types.InlineKeyboardButton("Нет, спасибо", callback_data="dva")
+            markup.add(knopka1, knopka2)
+            bot.send_message(message.chat.id, "Что-нибудь еще?", reply_markup=markup)
 
 
-
-
-
-def qaz(message):
-    vopros = bot.send_message(message.chat.id, "Сколько")
-    bot.register_next_step_handler(vopros, qwe)
-def qwe(message):
+def voprosskolko(message):
+    bot.send_message(chat_id=message.message.chat.id, text = "Список валют: EUR - Euro Member Countries, \
+IDR - Indonesia Rupiah, BGN - Bulgaria Lev, ILS - Israel Shekel, GBP - United Kingdom Pound, DKK - Denmark Krone, \
+CAD - Canada Dollar, JPY - Japan Yen, HUF - Hungary Forint, RON - Romania New Leu, MYR - Malaysia Ringgit, SEK - \
+Sweden Krona, SGD - Singapore Dollar, HKD - Hong Kong Dollar, AUD - Australia Dollar, CHF - Switzerland Franc, \
+KRW - Korea (South) Won, CNY - China Yuan Renminbi, TRY - Turkey Lira, HRK - Croatia Kuna, NZD - New Zealand \
+Dollar, THB - Thailand Baht, USD - United States Dollar, NOK - Norway Krone, RUB - Russia Ruble, INR - India \
+Rupee, MXN - Mexico Peso, CZK - Czech Republic Koruna, BRL - Brazil Real, PLN - Poland Zloty, PHP - Philippines \
+Peso, ZAR - South Africa Rand")
+    vopros = bot.send_message(chat_id=message.message.chat.id, text = "Сколько хотите перевести?")
+    bot.register_next_step_handler(vopros, voprosizchego)
+def voprosizchego(message):
     try:
         float(message.text)
     except ValueError:
-        bot.send_message(message.chat.id, "введите число")
-        qaz(message)
+        bot.send_message(chat_id=message.chat.id, text = "Используйте числа")
+        vopros = bot.send_message(chat_id=message.chat.id, text="Сколько?")
+        bot.register_next_step_handler(vopros, voprosizchego)
     else:
-        quantity = list.append(message.text)
-        vopros1 = bot.send_message(message.chat.id, "из чего")
-        bot.register_next_step_handler(vopros1, qwer )
+        if float(message.text) == 300:
+            bot.send_message(chat_id= message.chat.id, text = "Отсоси у тракториста))))")
+            bot.send_document(chat_id = message.chat.id, data = "CAADAgADNgADjO15Gb1ZQHwpLDd2Ag")
+            quantity = list.append(message.text)
+            vopros1 = bot.send_message(chat_id=message.chat.id, text="Из чего?")
+            bot.register_next_step_handler(vopros1, voprosvochto)
+        else:
+            quantity = list.append(message.text)
+            vopros1 = bot.send_message(chat_id=message.chat.id,text = "Из чего?")
+            bot.register_next_step_handler(vopros1, voprosvochto)
 
-def qwer(message):
+
+
+def voprosvochto(message):
     try:
-        get_rates(str(message.text.upper()))
-    except RatesNotAvailableError:
-        bot.send_message(message.chat.id, "вы неправильно ввели название валюты")
-        vopros1 = bot.send_message(message.chat.id, "из чего")
-        bot.register_next_step_handler(vopros1, qwer)
+        str(message.text)
+    except UnicodeEncodeError:
+        bot.send_message(chat_id=message.chat.id, text="Вы неправильно ввели название валюты")
+        vopros1 = bot.send_message(chat_id=message.chat.id, text="Из чего?")
+        bot.register_next_step_handler(vopros1, voprosvochto)
     else:
-        izchego = list.append(message.text.upper())
-        vopros2 = bot.send_message(message.chat.id, "Во что")
-        bot.register_next_step_handler(vopros2, qwert)
-def qwert(message):
+        try:
+            get_rates(str(message.text.upper()))
+        except  RatesNotAvailableError:
+            bot.send_message(chat_id=message.chat.id, text="Вы неправильно ввели название валюты")
+            vopros1 = bot.send_message(chat_id=message.chat.id, text="Из чего?")
+            bot.register_next_step_handler(vopros1, voprosvochto)
+        else:
+            izchego = list.append(message.text.upper())
+            vopros2 = bot.send_message(chat_id=message.chat.id, text = "Во что?")
+            bot.register_next_step_handler(vopros2, konverter)
+
+
+
+def konverter(message):
     try:
-        get_rates(str(message.text.upper()))
-    except RatesNotAvailableError:
-        bot.send_message(message.chat.id, "вы неправильно ввели название валюты")
-        vopros2 = bot.send_message(message.chat.id, "Во что")
-        bot.register_next_step_handler(vopros2, qwert)
+        str(message.text)
+    except UnicodeEncodeError:
+        bot.send_message(chat_id=message.chat.id, text = "Вы неправильно ввели название валюты")
+        vopros2 = bot.send_message(chat_id=message.chat.id, text="Во что?")
+        bot.register_next_step_handler(vopros2, konverter)
     else:
-        vochto = list.append(message.text.upper())
-        c = CurrencyRates()
-        q = c.convert(str(list[1]), str(list[2]), float(list[0]))
-        bot.send_message(message.chat.id, q)
-        refresh(message)
+        try:
+            get_rates(str(message.text.upper()))
+        except RatesNotAvailableError:
+            bot.send_message(chat_id=message.chat.id, text="Вы неправильно ввели название валюты")
+            vopros2 = bot.send_message(chat_id=message.chat.id, text="Во что?")
+            bot.register_next_step_handler(vopros2, konverter)
+        else:
+            vochto = list.append(message.text.upper())
+            c = CurrencyRates()
+            q = c.convert(str(list[1]), str(list[2]), float(list[0]))
+            bot.send_document(chat_id = message.chat.id, data = "CAADAgADMAYAAvoLtggy_Y_k7S6puAI")
+            time.sleep(3)
+            bot.send_message(chat_id=message.chat.id, text = str(float(list[0])) + " " + str(list[1]) + " " + "=" + " " + \
+            str(round(float(q), 4)) + ' ' + str(list[2]))
+            refresh(message)
+
+
 def refresh(message):
     list[:] = []
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    knopka1 = types.InlineKeyboardButton("Да", callback_data="odin")
+    knopka2 = types.InlineKeyboardButton("Нет, спасибо", callback_data="dva")
+    markup.add(knopka1, knopka2)
+    bot.send_message(message.chat.id, "Что-нибудь еще?", reply_markup=markup)
 
 
-def wtfisup(message):
+def kypc(message):
     c = CurrencyRates()
     list1 = ['USD', "EUR", "GBP", "JPY", "CNY"]
     for i in list1:
         q = c.convert(str(i), "RUB", 1)
-        bot.send_message(message.chat.id,str(1) + " " + str(i) + " " + '=' + " " + str(round(float(q), 4)) + " " + \
+        bot.send_message(chat_id=message.message.chat.id,text = str(1) + " " + str(i) + " " + '=' + " " + str(round(float(q), 4)) + " " + \
                          "RUB")
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    knopka1 = types.InlineKeyboardButton("Да", callback_data="odin")
+    knopka2 = types.InlineKeyboardButton("Нет, спасибо", callback_data="dva")
+    markup.add(knopka1, knopka2)
+    bot.send_message(chat_id=message.message.chat.id, text = "Что-нибудь еще?", reply_markup=markup)
 
 
 while True:
-
     try:
-
         bot.polling(none_stop=True)
-
-    # ConnectionError and ReadTimeout because of possible timout of the requests library
-
-    # TypeError for moviepy errors
-
-    # maybe there are others, therefore Exception
-
     except Exception as e:
-
         telebot.logger.error(e)
-
         time.sleep(5)
