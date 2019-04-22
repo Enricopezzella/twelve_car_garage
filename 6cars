@@ -7,8 +7,8 @@ from forex_python.converter import CurrencyRates, get_rates, RatesNotAvailableEr
 from telebot import types
 
 
-token = '871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY'
-bot = telebot.TeleBot("871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY")
+token = 'never mind I'll find someone like you'
+bot = telebot.TeleBot("never mind I'll find someone like you")
 
 
 list = []
@@ -77,30 +77,50 @@ def voproskyda1(message):
 def pogoda(message):
     owm = pyowm.OWM('9a5624fb9a6d6535203e750abacf0e32')
     city = message.text
-    try: owm.weather_at_place(city)
-    except NotFoundError or UnicodeEncodeError:
-        bot.send_message(message.chat.id, "Вы неправильно ввели название города")
-        voproskyda1(message)
-    else:
+    if city == "Saint P.":
+        bot.send_message(chat_id=message.chat.id, text= "И мы уже достаточно прошли\
+                                                        Этот долгий путь с развалин до вершин \
+                                                        И я в Saint P. на Площади Восстания Машин")
+        bot.send_document(chat_id=message.chat.id, data = "CAADAgADCQADkJR4DlI0JkjI3al9Ag")
+        city = "Saint Petersburg"
         weather = owm.weather_at_place(city)
         w = weather.get_weather()
         temperature = w.get_temperature("celsius")["temp"]
         wind = w.get_wind()["speed"]
         hum = w.get_humidity()
-        try: str(city)
-        except UnicodeEncodeError:
+        bot.send_message(message.chat.id, "Сейчас в городе " + city + " " + "температура  " + \
+                         str(temperature) + "°C, влажность - " + str(hum) + "%, скорость ветра - " + str(wind) \
+        + "м/с" +"," + " " + "восстание машин не наблюдается.")
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        knopka1 = types.InlineKeyboardButton("Да", callback_data="odin")
+        knopka2 = types.InlineKeyboardButton("Нет, спасибо", callback_data="dva")
+        markup.add(knopka1, knopka2)
+        bot.send_message(message.chat.id, "Что-нибудь еще?", reply_markup=markup)
+    else:
+        try: owm.weather_at_place(city)
+        except NotFoundError:
             bot.send_message(message.chat.id, "Вы неправильно ввели название города")
             voproskyda1(message)
         else:
-            bot.send_document(chat_id=message.chat.id, data="CAADAgADMAYAAvoLtggy_Y_k7S6puAI")
-            time.sleep(3)
-            bot.send_message(message.chat.id,"Сейчас в городе " + str(city) + " " + "температура - " + \
+            weather = owm.weather_at_place(city)
+            w = weather.get_weather()
+            temperature = w.get_temperature("celsius")["temp"]
+            wind = w.get_wind()["speed"]
+            hum = w.get_humidity()
+            try: str(city)
+            except UnicodeEncodeError:
+                bot.send_message(message.chat.id, "Вы неправильно ввели название города")
+                voproskyda1(message)
+            else:
+                bot.send_document(chat_id=message.chat.id, data="CAADAgADMAYAAvoLtggy_Y_k7S6puAI")
+                time.sleep(3)
+                bot.send_message(message.chat.id,"Сейчас в городе " + str(city) + " " + "температура  " + \
                          str(temperature) + "°C, влажность - " + str(hum) + "%, скорость ветра - " +str(wind) + "м/с.")
-            markup = types.InlineKeyboardMarkup(row_width=1)
-            knopka1 = types.InlineKeyboardButton("Да", callback_data="odin")
-            knopka2 = types.InlineKeyboardButton("Нет, спасибо", callback_data="dva")
-            markup.add(knopka1, knopka2)
-            bot.send_message(message.chat.id, "Что-нибудь еще?", reply_markup=markup)
+                markup = types.InlineKeyboardMarkup(row_width=1)
+                knopka1 = types.InlineKeyboardButton("Да", callback_data="odin")
+                knopka2 = types.InlineKeyboardButton("Нет, спасибо", callback_data="dva")
+                markup.add(knopka1, knopka2)
+                bot.send_message(message.chat.id, "Что-нибудь еще?", reply_markup=markup)
 
 
 def voprosskolko(message):
