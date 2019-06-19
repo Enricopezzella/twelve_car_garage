@@ -1,0 +1,624 @@
+# coding=utf-8
+import time
+import pyowm
+import telebot
+from pyowm.exceptions.api_response_error import NotFoundError
+from forex_python.converter import CurrencyRates
+from telebot import types
+
+
+
+token = "871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY"
+bot = telebot.TeleBot("871805585:AAEgAuDU30QiwsAK0B0Aa0KSPdN8AylAsUY")
+
+
+list = []
+
+
+@bot.message_handler(commands=["start"])
+def start(message):
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    itembtn1 = types.InlineKeyboardButton("Показать погоду", callback_data="one")
+    itembtn2 = types.InlineKeyboardButton("Показать курс валют", callback_data="two")
+    itembtn3 = types.InlineKeyboardButton("Включить конвертер валют", callback_data="three")
+    markup.add(itembtn1, itembtn2, itembtn3)
+    bot.send_message(message.chat.id, "Выбери", reply_markup=markup)
+
+
+@bot.message_handler(commands=["info"])
+def info(message):
+    bot.send_message(chat_id=message.chat.id, text =
+    """Доступные валюты: 
+EUR - Euro Member Countries
+IDR - Indonesia Rupiah
+BGN - Bulgaria Lev
+ILS - Israel Shekel
+GBP - United Kingdom Pound 
+DKK - Denmark Krone
+CAD - Canada Dollar 
+JPY - Japan Yen
+HUF - Hungary Forint
+RON - Romania New Leu
+MYR - Malaysia Ringgit
+SEK - Sweden Krona
+SGD - Singapore Dollar
+HKD - Hong Kong Dollar
+AUD - Australia Dollar
+CHF - Switzerland Franc
+KRW - Korea (South) Won
+CNY - China Yuan Renminbi
+TRY - Turkey Lira
+HRK - Croatia Kuna
+NZD - New Zealand Dollar
+THB - Thailand Baht
+USD - United States Dollar
+NOK - Norway Krone
+RUB - Russia Ruble
+INR - India Rupee
+MXN - Mexico Peso
+CZK - Czech Republic Koruna
+BRL - Brazil Real
+PLN - Poland Zloty
+PHP - Philippines Peso
+ZAR - South Africa Rand""")
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def handle(message):
+    if message.data == "one":
+        bot.delete_message(chat_id = message.message.chat.id,message_id = message.message.message_id)
+        voproskyda(message)
+    elif message.data == "odin":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        itembtn1 = types.InlineKeyboardButton("Показать погоду", callback_data="one")
+        itembtn2 = types.InlineKeyboardButton("Показать курс валют", callback_data="two")
+        itembtn3 = types.InlineKeyboardButton("Включить конвертер валют", callback_data="three")
+        markup.add(itembtn1, itembtn2, itembtn3)
+        bot.send_message(chat_id= message.message.chat.id, text = "Выбери одно", reply_markup=markup)
+    elif message.data == "dva":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.send_document(chat_id=message.message.chat.id, data="CAADAgADXwUAAvoLtgiM3nB1w_T5xwI")
+    elif message.data == "two":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        kypc(message)
+    elif message.data == "three":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        voprosizchego(message)
+    elif message.data == "eur":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("EUR")
+        voprosvochto(message)
+    elif message.data == "usd":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("USD")
+        voprosvochto(message)
+    elif message.data == "rub":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("RUB")
+        voprosvochto(message)
+    elif message.data == "bgn":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("BGN")
+        voprosvochto(message)
+    elif message.data == "ils":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("RUB")
+        voprosvochto(message)
+    elif message.data == "gbp":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("RUB")
+        voprosvochto(message)
+    elif message.data == "dkk":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("DKK")
+        voprosvochto(message)
+    elif message.data == "cad":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("CAD")
+        voprosvochto(message)
+    elif message.data == "jpy":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("JPY")
+        voprosvochto(message)
+    elif message.data == "huf":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("HUF")
+        voprosvochto(message)
+    elif message.data == "ron":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("RON")
+        voprosvochto(message)
+    elif message.data == "myr":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("MYR")
+        voprosvochto(message)
+    elif message.data == "sek":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("SEK")
+        voprosvochto(message)
+    elif message.data == "sgd":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("SGD")
+        voprosvochto(message)
+    elif message.data == "hkd":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("HKD")
+        voprosvochto(message)
+    elif message.data == "aud":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("AUD")
+        voprosvochto(message)
+    elif message.data == "chf":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("CHF")
+        voprosvochto(message)
+    elif message.data == "krw":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("KRW")
+        voprosvochto(message)
+    elif message.data == "cny":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("CNY")
+        voprosvochto(message)
+    elif message.data == "try":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("TRY")
+        voprosvochto(message)
+    elif message.data == "hrk":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("HRK")
+        voprosvochto(message)
+    elif message.data == "nzd":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("NZD")
+        voprosvochto(message)
+    elif message.data == "thb":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("THB")
+        voprosvochto(message)
+    elif message.data == "nok":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("NOK")
+        voprosvochto(message)
+    elif message.data == "idr":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("IDR")
+        voprosvochto(message)
+    elif message.data == "inr":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("INR")
+        voprosvochto(message)
+    elif message.data == "mxn":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("MXN")
+        voprosvochto(message)
+    elif message.data == "czk":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("CZK")
+        voprosvochto(message)
+    elif message.data == "brl":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("BRL")
+        voprosvochto(message)
+    elif message.data == "pln":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("PLN")
+        voprosvochto(message)
+    elif message.data == "php":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("PHP")
+        voprosvochto(message)
+    elif message.data == "zar":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(message.data).upper())
+        list.append("ZAR")
+        voprosvochto(message)
+    elif message.data == "eur1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("EUR")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "usd1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("USD")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "rub1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("RUB")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "bgn1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("BGN")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "ils1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("RUB")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "gbp1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("RUB")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "dkk1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("DKK")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "cad1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("CAD")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "jpy1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("JPY")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "huf1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("HUF")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "ron1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("RON")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "myr1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("MYR")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "sek1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("SEK")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "sgd1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("SGD")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "hkd1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("HKD")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "aud1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("AUD")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "chf1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("CHF")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "krw1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("KRW")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "cny1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("CNY")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "try1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("TRY")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "hrk1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("HRK")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "nzd1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("NZD")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "thb1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("THB")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "nok1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("NOK")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "idr1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("IDR")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "inr1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("INR")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "mxn1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("MXN")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "czk1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("CZK")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "brl1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("BRL")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "pln1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("PLN")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "php1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("PHP")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+    elif message.data == "zar1":
+        bot.delete_message(chat_id=message.message.chat.id, message_id=message.message.message_id)
+        list.append("ZAR")
+        bot.answer_callback_query(message.id, "Вы выбрали" + " " + str(list[1]).upper())
+        skolko(message)
+
+
+def voproskyda(message):
+    bot.send_message(chat_id=message.message.chat.id, text="Пожалуйста, используйте латиницу и полные названия городов")
+    city = bot.send_message(chat_id =message.message.chat.id, text = "Введите город")
+    bot.register_next_step_handler(city, pogoda)
+
+
+def voproskyda1(message):
+    city = bot.send_message(chat_id=message.chat.id, text="Введите город")
+    bot.register_next_step_handler(city, pogoda)
+
+
+
+def pogoda(message):
+    owm = pyowm.OWM('9a5624fb9a6d6535203e750abacf0e32')
+    city = message.text
+    if city == "Saint P.":
+        bot.send_message(chat_id=message.chat.id, text= """И мы уже достаточно прошли
+Этот долгий путь с развалин до вершин
+И я в Saint P. на Площади Восстания Машин""")
+        bot.send_document(chat_id=message.chat.id, data = "CAADAgADCQADkJR4DlI0JkjI3al9Ag")
+        city = "Saint Petersburg"
+        weather = owm.weather_at_place(city)
+        w = weather.get_weather()
+        temperature = w.get_temperature("celsius")["temp"]
+        wind = w.get_wind()["speed"]
+        hum = w.get_humidity()
+        bot.send_message(message.chat.id, "Сейчас в городе " + city + " " + "температура " + \
+                         str(temperature) + "°C, влажность - " + str(hum) + "%, скорость ветра - " + str(wind) \
+        + "м/с" +"," + " " + "восстание машин не наблюдается.")
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        knopka1 = types.InlineKeyboardButton("Да", callback_data="odin")
+        knopka2 = types.InlineKeyboardButton("Нет, спасибо", callback_data="dva")
+        markup.add(knopka1, knopka2)
+        bot.send_message(message.chat.id, "Что-нибудь еще?", reply_markup=markup)
+    else:
+        try: owm.weather_at_place(city)
+        except NotFoundError:
+            bot.send_message(message.chat.id, "Вы неправильно ввели название города")
+            voproskyda1(message)
+        else:
+            weather = owm.weather_at_place(city)
+            w = weather.get_weather()
+            temperature = w.get_temperature("celsius")["temp"]
+            wind = w.get_wind()["speed"]
+            hum = w.get_humidity()
+            try: str(city)
+            except UnicodeEncodeError:
+                bot.send_message(message.chat.id, "Вы неправильно ввели название города")
+                voproskyda1(message)
+            else:
+                bot.send_document(chat_id=message.chat.id, data="CAADAgADMAYAAvoLtggy_Y_k7S6puAI")
+                time.sleep(3)
+                bot.send_message(message.chat.id,"Сейчас в городе " + str(city) + " " + "температура  " + \
+                         str(temperature) + "°C, влажность - " + str(hum) + "%, скорость ветра - " +str(wind) + "м/с.")
+                markup = types.InlineKeyboardMarkup(row_width=1)
+                knopka1 = types.InlineKeyboardButton("Да", callback_data="odin")
+                knopka2 = types.InlineKeyboardButton("Нет, спасибо", callback_data="dva")
+                markup.add(knopka1, knopka2)
+                bot.send_message(message.chat.id, "Что-нибудь еще?", reply_markup=markup)
+
+
+def voprosizchego(message):
+    markup1 = types.InlineKeyboardMarkup(row_width=8)
+    itembtn4 = types.InlineKeyboardButton("EUR", callback_data="eur")
+    itembtn5 = types.InlineKeyboardButton("USD", callback_data="usd")
+    itembtn6 = types.InlineKeyboardButton("RUB", callback_data="rub")
+    itembtn7 = types.InlineKeyboardButton("BGN", callback_data="bgn")
+    itembtn8 = types.InlineKeyboardButton("ILS", callback_data="ils")
+    itembtn9 = types.InlineKeyboardButton("GBP", callback_data="gbp")
+    itembtn10 = types.InlineKeyboardButton("DKK", callback_data="dkk")
+    itembtn11 = types.InlineKeyboardButton("CAD", callback_data="cad")
+    itembtn12 = types.InlineKeyboardButton("JPY", callback_data="jpy")
+    itembtn13 = types.InlineKeyboardButton("HUF", callback_data="huf")
+    itembtn14 = types.InlineKeyboardButton("RON", callback_data="ron")
+    itembtn15 = types.InlineKeyboardButton("MYR", callback_data="myr")
+    itembtn16 = types.InlineKeyboardButton("SEK", callback_data="sek")
+    itembtn17 = types.InlineKeyboardButton("SGD", callback_data="sgd")
+    itembtn18 = types.InlineKeyboardButton("HKD", callback_data="hkd")
+    itembtn19 = types.InlineKeyboardButton("AUD", callback_data="aud")
+    itembtn20 = types.InlineKeyboardButton("CHF", callback_data="chf")
+    itembtn21 = types.InlineKeyboardButton("KRW", callback_data="krw")
+    itembtn22 = types.InlineKeyboardButton("CNY", callback_data="cny")
+    itembtn23 = types.InlineKeyboardButton("TRY", callback_data="try")
+    itembtn24 = types.InlineKeyboardButton("HRK", callback_data="hrk")
+    itembtn25 = types.InlineKeyboardButton("NZD", callback_data="nzd")
+    itembtn26 = types.InlineKeyboardButton("THB", callback_data="thb")
+    itembtn27 = types.InlineKeyboardButton("NOK", callback_data="nok")
+    itembtn28 = types.InlineKeyboardButton("IDR", callback_data="idr")
+    itembtn29 = types.InlineKeyboardButton("INR", callback_data="inr")
+    itembtn30 = types.InlineKeyboardButton("MXN", callback_data="mxn")
+    itembtn31 = types.InlineKeyboardButton("CZK", callback_data="czk")
+    itembtn32 = types.InlineKeyboardButton("BRL", callback_data="brl")
+    itembtn33 = types.InlineKeyboardButton("PLN", callback_data="pln")
+    itembtn34 = types.InlineKeyboardButton("PHP", callback_data="php")
+    itembtn35 = types.InlineKeyboardButton("ZAR", callback_data="zar")
+    markup1.add(itembtn4, itembtn5, itembtn6,itembtn7, itembtn8, itembtn9,itembtn10, itembtn11, itembtn12, itembtn13, \
+               itembtn14, itembtn15, itembtn16, itembtn17, itembtn18, itembtn19, itembtn20, itembtn21, itembtn22, \
+               itembtn23, itembtn24, itembtn25, itembtn26, itembtn27, itembtn28, itembtn29, itembtn30, itembtn31, \
+               itembtn32, itembtn33, itembtn34, itembtn35)
+    bot.send_message(message.message.chat.id, "Из какой валюты перевести?", reply_markup=markup1)
+
+
+def voprosvochto(message):
+    markup2 = types.InlineKeyboardMarkup(row_width=8)
+    itembtn4 = types.InlineKeyboardButton("EUR", callback_data="eur1")
+    itembtn5 = types.InlineKeyboardButton("USD", callback_data="usd1")
+    itembtn6 = types.InlineKeyboardButton("RUB", callback_data="rub1")
+    itembtn7 = types.InlineKeyboardButton("BGN", callback_data="bgn1")
+    itembtn8 = types.InlineKeyboardButton("ILS", callback_data="ils1")
+    itembtn9 = types.InlineKeyboardButton("GBP", callback_data="gbp1")
+    itembtn10 = types.InlineKeyboardButton("DKK", callback_data="dkk1")
+    itembtn11 = types.InlineKeyboardButton("CAD", callback_data="cad1")
+    itembtn12 = types.InlineKeyboardButton("JPY", callback_data="jpy1")
+    itembtn13 = types.InlineKeyboardButton("HUF", callback_data="huf1")
+    itembtn14 = types.InlineKeyboardButton("RON", callback_data="ron1")
+    itembtn15 = types.InlineKeyboardButton("MYR", callback_data="myr1")
+    itembtn16 = types.InlineKeyboardButton("SEK", callback_data="sek1")
+    itembtn17 = types.InlineKeyboardButton("SGD", callback_data="sgd1")
+    itembtn18 = types.InlineKeyboardButton("HKD", callback_data="hkd1")
+    itembtn19 = types.InlineKeyboardButton("AUD", callback_data="aud1")
+    itembtn20 = types.InlineKeyboardButton("CHF", callback_data="chf1")
+    itembtn21 = types.InlineKeyboardButton("KRW", callback_data="krw1")
+    itembtn22 = types.InlineKeyboardButton("CNY", callback_data="cny1")
+    itembtn23 = types.InlineKeyboardButton("TRY", callback_data="try1")
+    itembtn24 = types.InlineKeyboardButton("HRK", callback_data="hrk1")
+    itembtn25 = types.InlineKeyboardButton("NZD", callback_data="nzd1")
+    itembtn26 = types.InlineKeyboardButton("THB", callback_data="thb1")
+    itembtn27 = types.InlineKeyboardButton("NOK", callback_data="nok1")
+    itembtn28 = types.InlineKeyboardButton("IDR", callback_data="idr1")
+    itembtn29 = types.InlineKeyboardButton("INR", callback_data="inr1")
+    itembtn30 = types.InlineKeyboardButton("MXN", callback_data="mxn1")
+    itembtn31 = types.InlineKeyboardButton("CZK", callback_data="czk1")
+    itembtn32 = types.InlineKeyboardButton("BRL", callback_data="brl1")
+    itembtn33 = types.InlineKeyboardButton("PLN", callback_data="pln1")
+    itembtn34 = types.InlineKeyboardButton("PHP", callback_data="php1")
+    itembtn35 = types.InlineKeyboardButton("ZAR", callback_data="zar1")
+    markup2.add(itembtn4, itembtn5, itembtn6,itembtn7, itembtn8, itembtn9,itembtn10, itembtn11, itembtn12, itembtn13, \
+               itembtn14, itembtn15, itembtn16, itembtn17, itembtn18, itembtn19, itembtn20, itembtn21, itembtn22, \
+               itembtn23, itembtn24, itembtn25, itembtn26, itembtn27, itembtn28, itembtn29, itembtn30, itembtn31, \
+               itembtn32, itembtn33, itembtn34, itembtn35)
+    bot.send_message(message.message.chat.id, "В какую валюту перевести?", reply_markup=markup2)
+
+
+@bot.message_handler(content_types=['text'])
+def proverka(message):
+    if list==[]:
+        pass
+    else:
+        try:
+            list[1]==[]
+        except IndexError:
+            pass
+        else:
+            skolko(message)
+
+
+def skolko(message):
+    quantity = bot.send_message(chat_id=message.message.chat.id, text="Сколько?")
+    bot.register_next_step_handler(quantity, skolko1)
+
+def skolko1(message):
+    try:
+        float(message.text)
+    except:
+        bot.send_message(chat_id=message.chat.id, text="Используйте числа")
+        vopros = bot.send_message(chat_id=message.chat.id, text="Сколько?")
+        bot.register_next_step_handler(vopros, skolko1)
+    else:
+        if float(message.text) == 300:
+            bot.send_message(chat_id= message.chat.id, text = "Отсоси у тракториста))))")
+            bot.send_document(chat_id = message.chat.id, data = "CAADAgADNgADjO15Gb1ZQHwpLDd2Ag")
+            list.append(300)
+            c = CurrencyRates()
+            q = c.convert(str(list[0]), str(list[1]), float(list[2]))
+            bot.send_message(chat_id=message.chat.id, text=str(float(list[2])) + " " + str(list[0]) + " " + "=" + \
+                                                           " " + str(round(float(q), 4)) + ' ' + str(list[1]))
+            refresh(message)
+        else:
+            list.append(message.text)
+            c = CurrencyRates()
+            q = c.convert(str(list[0]), str(list[1]), float(list[2]))
+            bot.send_document(chat_id=message.chat.id, data="CAADAgADMAYAAvoLtggy_Y_k7S6puAI")
+            time.sleep(3)
+            bot.send_message(chat_id=message.chat.id, text=str(float(list[2])) + " " + str(list[0]) + " " + "=" + \
+                                                           " " + str(round(float(q), 4)) + ' ' + str(list[1]))
+            refresh(message)
+
+def refresh(message):
+    list[:] = []
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    knopka1 = types.InlineKeyboardButton("Да", callback_data="odin")
+    knopka2 = types.InlineKeyboardButton("Нет, спасибо", callback_data="dva")
+    markup.add(knopka1, knopka2)
+    bot.send_message(message.chat.id, "Что-нибудь еще?", reply_markup=markup)
+
+
+def kypc(message):
+    c = CurrencyRates()
+    list1 = ['USD', "EUR", "GBP", "JPY", "CNY"]
+    for i in list1:
+        q = c.convert(str(i), "RUB", 1)
+        bot.send_message(chat_id=message.message.chat.id,text = str(1) + " " + str(i) + " " + '=' + " " + \
+                                                                str(round(float(q), 4)) + " " + "RUB")
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    knopka1 = types.InlineKeyboardButton("Да", callback_data="odin")
+    knopka2 = types.InlineKeyboardButton("Нет, спасибо", callback_data="dva")
+    markup.add(knopka1, knopka2)
+    bot.send_message(chat_id=message.message.chat.id, text = "Что-нибудь еще?", reply_markup=markup)
+
+
+while True:
+    try:
+        bot.polling(none_stop=True, timeout=60)
+    except:
+        pass
